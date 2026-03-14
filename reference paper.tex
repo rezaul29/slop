@@ -1,0 +1,352 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{svg}
+\usepackage{array}
+% \usepackage{parskip}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\hypersetup{
+    colorlinks=false,  % No colored links for IEEE format
+    pdfborder={0 0 0}, % No border around links
+    breaklinks=true
+}
+
+\begin{document}
+
+\title{
+% PaddyVarietyBD: A Hybrid Deep Learning Framework for Classifying Bangladesh Paddy Varieties Using Microscopic Image Analysis
+ConvNeXtDINO: A Novel Hybrid Framework for Paddy Classification
+}
+
+\author{
+% \IEEEauthorblockN{Anonymous Authors}
+% \IEEEauthorblockA{\textit{Department} \\
+% \textit{Institution}\\
+% City, Country \\
+% email@domain.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Accurate identification of paddy varieties is critical for seed certification, quality control, and agricultural research, yet traditional manual inspection methods are time-intensive and subjective. This paper presents a novel hybrid deep learning framework for automated paddy variety classification using microscopic RGB imagery. We combined ConvNeXt V2 for hierarchical feature extraction with DINOv2 for self-supervised representation learning, achieving 97.50\% accuracy on the PaddyVarietyBD dataset comprising 14,000 images across 35 Bangladesh-cultivated varieties. Through systematic evaluation of 18 architectures—including CNNs (VGG-19, ResNet, DenseNet, Xception, Inception V4), vision transformers (ViT, Swin Transformer V2, DINOv2), modern convolutional networks (ConvNeXt V2, MobileNetV4), and various hybrid combinations—we demonstrate that strategic fusion of convolutional and transformer features yields superior discriminative capability. Our hybrid approach outperforms the best standalone CNN by 2.14\% and establishes new state-of-the-art benchmarks. These findings validate that self-supervised pre-training provides robust feature representations that generalize effectively to specialized agricultural domains, offering practical pathways toward commercial deployment in seed authentication and quality assurance systems.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Paddy classification, deep learning, hybrid architecture, ConvNeXt V2, DINOv2, vision transformer, agricultural automation, microscopic imaging, CNN
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Rice serves as the primary dietary staple for more than half of the global population, particularly throughout Asian regions, where it constitutes the fundamental component of daily nutrition. Bangladesh, positioned as the fourth largest rice producer worldwide, depends heavily on this crop for both food security and economic stability. The nation cultivates numerous paddy varieties, each exhibiting distinct morphological characteristics, environmental adaptations, and agronomic properties. Precise identification of these varieties plays a crucial role in seed certification, quality assurance, breeding programs, and market regulation.
+
+Traditional methods for paddy variety identification rely predominantly on visual inspection by agricultural experts, examining physical attributes such as grain shape, size, color, and texture. While experienced practitioners can achieve reasonable accuracy, this approach suffers from inherent limitations, including subjective judgment, time consumption, and scalability constraints. As agricultural production intensifies and seed markets expand, automated classification systems have become increasingly necessary.
+
+Recent advances in computer vision and neural networks have opened new pathways for agricultural automation. Convolutional neural networks and vision transformers~\cite{vit} have demonstrated remarkable success in image-based plant phenotyping, crop disease detection, and seed quality assessment. However, paddy variety classification presents unique challenges due to subtle inter-class morphological differences and high intra-class variability caused by environmental factors and imaging conditions.
+
+The PaddyVarietyBD dataset~\cite{dataset} addresses a critical gap in agricultural machine learning research by providing standardized microscopic imagery of 35 paddy varieties cultivated in Bangladesh. Each variety exhibits unique kernel characteristics, including dimension ratios, color profiles, and surface textures that require sophisticated feature extraction capabilities.
+
+While numerous neural network architectures have been proposed for general image classification, their direct application to fine-grained agricultural tasks often yields suboptimal results. Convolutional networks excel at capturing local spatial patterns but may struggle with global context modeling. Conversely, vision transformers leverage self-attention mechanisms for holistic feature learning yet require substantial training data. This motivates our exploration of hybrid architectures that combine complementary strengths of CNNs and transformers.
+
+\textbf{Key Contributions:}This research makes three significant contributions:
+
+\begin{itemize}
+\item \textbf{Novel Hybrid Framework:} We introduce an innovative architecture combining ConvNeXt V2~\cite{convnext} for hierarchical feature extraction with DINOv2~\cite{dinov2} for self-supervised representation learning, achieving superior classification performance through synergistic integration of convolutional and transformer-based components.
+
+\item \textbf{Comprehensive Architecture Evaluation:} We systematically evaluate 18 neural network architectures spanning traditional CNNs, modern convolutional networks, vision transformers, and hybrid combinations, providing valuable insights for agricultural imaging tasks.
+
+\item \textbf{Benchmark Performance Achievement:} Our proposed framework establishes new state-of-the-art results on the PaddyVarietyBD dataset with 97.50\% accuracy, demonstrating the effectiveness of strategic model fusion for fine-grained classification.
+\end{itemize}
+
+
+
+\section{Related Work}
+
+Automated paddy seed classification has been widely explored using traditional image-processing, statistical learning, and deep learning approaches. Early studies primarily focused on handcrafted shape, color, and texture features, whereas recent works have shifted toward deep neural networks and hyperspectral imaging for improved accuracy and generalization.
+
+\subsection{Handcrafted Feature-Based Methods}
+
+Initial research in paddy seed identification leveraged handcrafted features for discrimination. Chaugule and Mali \cite{https://doi.org/10.1155/2014/617263} evaluated texture and shape descriptors for classifying four paddy varieties using geometric and statistical measures. They later incorporated shape and color features \cite{chaugule2014}, demonstrating that combining these modalities enhances separability across seed classes. Building on this, Chaugule and Mali \cite{CHAUGULE2016415} proposed a novel \emph{seed-angle}–based descriptor that computes dot-product relations between major and minor axes to quantify orientation-dependent shape variation, achieving improved 97.6\% accuracy compared to earlier Color–Shape–Texture obtained accuracy of 95.2\%. 
+
+Anami \textit{et~al.} \cite{ANAMI201947} addressed bulk paddy grain adulteration by extracting gray level co-occurrence matrix (GLCM) and local binary pattern (LBP) texture features, followed by feature selection using principal component analysis (PCA). They trained backpropagation neural networks (BPNN) with PCA-based reduced features and achieved 93.31\% accuracy, demonstrating the utility of texture-based features in large-sample scenarios. 
+
+Huang and Chien \cite{s17040809} developed an automated seed identification framework employing morphological, color, and textural attributes, processed through a machine vision system to identify three varieties of foundation paddy seeds. Their method combined image segmentation with discriminant analysis to identify paddy seed varieties, obtaining 92.68\%, 97.35\% and 96.57\% per class accuracy respectively.
+
+Kiratiratanapruk \textit{et~al.} \cite{https://doi.org/10.1155/2020/7041310} designed a three-stage classification process consisting of preprocessing, feature extraction, and classification. They extracted shape, color, and texture features from 14 varieties each containing over 3,500 seeds and nearly a total of 50,000 paddy seeds, evaluating four machine learning models (LR, LDA, k-NN, and SVM) and five pretrained CNNs (VGG16, VGG19, Xception, InceptionV3, InceptionResNetV2). The best performance 95.15\% was achieved using InceptionResNetV2, confirming the superior feature-learning capability of deep networks over traditional descriptors.
+
+\subsection{Advanced Textural Descriptors and Feature Selection}
+
+Uddin \textit{et~al.} \cite{Uddin2022} introduced a robust hybrid feature extraction pipeline combining their proposed T20-HOG descriptor with Haralick textural features. Using Lasso-based feature selection and a feedforward neural network, their model achieved 99.28\% accuracy on the BDRICE and VNRICE datasets, consisting 10 different varieties.
+
+\subsection{Machine Vision and Multivariate Analysis}
+
+Ansari \textit{et~al.} \cite{ANSARI2021100109} utilized machine vision combined with multivariate statistical analysis to inspect varietal purity in three varieties of paddy seeds. Their study achieved 93.1\% classification accuracy. The authors emphasized the role of multivariate feature correlations in purity inspection, rather than relying on a single feature space.
+
+\subsection{Deep Learning Approaches}
+
+Islam \textit{et~al.} \cite{islam2023} proposed a deep convolutional neural network (CNN) for germinative paddy seed identification of three paddy varieties. Their architecture effectively captured fine morphological and textural variations associated with germination stages, outperforming handcrafted methods and achieving 99.50\% accuracy. 
+
+\subsection{Hyperspectral and Multimodal Fusion Techniques}
+
+Beyond RGB-based imaging, Siam \textit{et~al.} \cite{Siam2024} employed a feature fusion framework that integrates color and hyperspectral data for predicting paddy seed viability. Using multivariate analysis techniques such as partial least squares regression (PLSR) and principal component analysis (PCA), they achieved 93.3\% accuracy in distinguishing viable and nonviable seeds. The incorporation of spectral information provided insight into internal physiological properties that are invisible in RGB images.
+
+\subsection{ Research Gaps}
+
+Prior studies demonstrate significant progress in paddy seed classification through handcrafted features, classical machine learning, deep CNNs, and hyperspectral fusion. However, most works focus on limited variety sets (3-14 varieties): feature-based pipelines \cite{Uddin2022,https://doi.org/10.1155/2020/7041310} (10-14 varieties) achieve high accuracy but require controlled conditions. Deep learning models \cite{islam2023} (3 varieties) show strong generalization but demand substantial resources. Hyperspectral methods \cite{Siam2024} improve physiological inference at increased acquisition complexity.
+
+Research on comprehensive datasets with a larger set of variety (35 varieties) representing diverse morphological characteristics remains limited. This gap motivates our investigation of scalable hybrid architectures that combine convolutional and transformer-based features to maintain high performance across an extensive collection of varieties, balancing accuracy, efficiency, and practical deployment requirements for real-world agricultural applications.
+
+\section{Dataset}
+
+\subsection{Dataset Overview}
+The PaddyVarietyBD dataset comprises 14,000 microscopic RGB images of 35 paddy varieties cultivated in Bangladesh, 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{dataset_samples.png}
+\caption{Representative microscopic images of 35 paddy varieties.}
+\label{fig:dataset_samples}
+\end{figure}
+
+compiled through collaboration with the Bangladesh Rice Research Institute (BRRI) and Bangladesh Institute of Nuclear Agriculture (BINA). Each variety includes 400 images (100 kernels photographed from four orientations) with standardized dimensions of 640×480 pixels. Images were captured using precision microscopic systems at 1000x and 1600x magnification, ensuring consistent illumination and sufficient detail for distinguishing subtle morphological features.
+
+\subsection{Dataset Visualization}
+
+Figure~\ref{fig:dataset_samples} presents representative images from 35 varieties showcasing morphological diversity in kernel shape, size, color intensity, and surface texture. These variations form the basis for automated classification, though subtle inter-variety similarities challenge discrimination. The high-resolution imaging captures fine-grained details, including surface roughness, color gradients, and dimensional ratios that distinguish varieties.
+
+
+
+
+
+
+
+
+
+\section{Methodology}
+
+\subsection{Model Architectures}
+
+We systematically evaluate 18 neural network architectures spanning traditional CNNs, modern convolutional networks, vision transformers, and hybrid combinations to establish comprehensive baselines for paddy variety classification.
+
+\subsubsection{Convolutional Neural Networks}
+
+We evaluate six CNN architectures: \textbf{VGG-19}~\cite{vgg-19} employs stacked 3×3 convolutions for deep feature hierarchies, \textbf{ResNet-50/101}~\cite{resnet} use residual connections enabling deeper architectures, \textbf{DenseNet-201}~\cite{densenet-201} connects each layer to subsequent layers for feature reuse, \textbf{Inception V4}~\cite{inception-v4} processes multi-scale features through parallel pathways, and \textbf{Xception}~\cite{xception} utilizes depthwise separable convolutions for efficient fine-grained discrimination.
+
+\subsubsection{Modern Convolutional Architectures}
+
+\textbf{ConvNeXt V2} modernizes CNNs with transformer-inspired elements (larger kernels, sophisticated normalization) achieving competitive performance while maintaining convolutional inductive biases. \textbf{MobileNetV4}~\cite{mobilenet} optimizes for efficiency through depthwise separable convolutions and neural architecture search.
+
+\subsubsection{Vision Transformers}
+
+\textbf{Vision Transformer (ViT)} divides images into patches processed as tokens with multi-head self-attention for global context modeling. \textbf{Swin Transformer V2}~\cite{swin} employs hierarchical shifted window attention balancing efficiency with multi-scale representations. \textbf{DINOv2} learns transferable visual representations through self-supervised knowledge distillation.
+
+\subsubsection{Hybrid Architectures}
+
+We combine convolutional feature extractors with transformer refinement modules to leverage complementary strengths: \textbf{ConvNeXt V2 + ViT/DINOv2}, \textbf{DenseNet-201 + ViT}, \textbf{ResNet-50/101 + ViT}, \textbf{Xception + ViT}, and \textbf{Swin Transformer V2 + ViT}.
+
+\subsubsection{Classification Head}
+
+All architectures use a unified classification module with 8-head self-attention, layer normalization, feed-forward network (4× expansion with GELU activation and 0.1 dropout), residual connections, and final linear projection to 35 class logits.
+
+\subsection{Proposed Hybrid Framework}
+
+Our architecture combines ConvNeXt V2 and DINOv2 through four stages (Figure~\ref{fig:hybrid_architecture}): (1) ConvNeXt V2 extracts hierarchical features (grain boundaries, textures, color gradients), producing 1024-dimensional representations. (2) Linear projection with normalization adapts features to DINOv2's 768-dimensional input space. (3) DINOv2 refines features through self-attention, capturing global contextual relationships. (4) Classification head processes enhanced features for final predictions. This synergy between local pattern expertise and global reasoning effectively handles fine-grained morphological discrimination.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=0.48\textwidth]{hybrid-architecture-diagram.png}
+\caption{Proposed hybrid architecture combining ConvNeXt V2 and DINOv2}
+\label{fig:hybrid_architecture}
+\end{figure}
+
+\subsection{Experimental Setup}
+
+The 14,000-image dataset is split 80:10:10 (training:validation:test), providing 11,200/1,400/1,400 images with stratified sampling ensuring balanced class representation (320/40/40 images per variety). All models train for 50 epochs using the AdamW optimizer (learning rate 2e-5, batch size 16) with cross-entropy loss. We select the best validation checkpoint and report test set accuracy, precision, recall, and F1-score (per-class and macro-averaged).
+
+
+\section{Results and Analysis}
+
+\subsection{Overall Performance Comparison}
+
+
+\begin{table}[ht]
+\centering
+\caption{Performance Metrics of Evaluated Architectures}
+\label{tab:model_performance}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy (\%)} & \textbf{Precision (\%)} & \textbf{Recall (\%)} & \textbf{F1-Score (\%)} \\
+\hline
+\textbf{ConvNeXt V2 + DINOv2}& \textbf{97.50}& \textbf{97.58}& \textbf{97.50}& \textbf{97.50}\\
+\hline
+DenseNet-201 + ViT& 97.21& 97.16& 97.20& 97.19\\\hline
+ConvNeXt V2 + ViT& 97.07& 97.21& 97.07& 97.08\\\hline
+Xception + ViT& 96.00& 96.15& 96.03& 96.07\\\hline
+ResNet-101 + ViT& 95.78& 96.07& 95.79& 95.93\\\hline
+Xception& 95.36& 95.39& 95.36& 95.30\\\hline
+MobileNetV4& 94.93& 95.26& 94.93& 94.92\\\hline
+Inception V4& 94.50& 95.11& 94.50& 94.70\\\hline
+ResNet-50 + ViT& 94.07& 94.69& 94.07& 94.30\\\hline
+VGG-19& 94.00& 94.13& 94.00& 93.99\\\hline
+ResNet-101& 93.42& 93.66& 93.43& 93.46\\\hline
+ResNet-50& 93.36& 93.52& 93.36& 93.33\\\hline
+ConvNeXt V2& 92.93& 93.09& 92.92& 92.87\\\hline
+Swin Transformer V2 + ViT& 92.57& 93.41& 92.56& 92.79\\\hline
+Swin Transformer V2& 92.36& 93.02& 92.36& 92.39\\\hline
+ViT& 92.10& 92.13& 92.04& 92.09\\\hline
+DenseNet-201& 91.50& 92.06& 91.50& 91.66\\\hline
+DINOv2& 91.00& 91.13& 91.00& 90.90\\\hline
+\end{tabular}
+}
+\end{table}
+
+Table~\ref{tab:model_performance} presents test set performance for all 18 evaluated architectures. Our proposed ConvNeXt V2 + DINOv2 achieves 97.50\% accuracy with balanced precision (97.58\%), recall (97.50\%), and F1-score (97.50\%), demonstrating consistent classification across all 35 varieties.
+
+Among standalone CNNs, Xception leads at 95.36\%, followed by MobileNetV4 (94.93\%), Inception V4 (94.50\%), and VGG-19 (94.00\%). ResNet-101 (93.42\%) marginally outperforms ResNet-50 (93.36\%), while DenseNet-201 achieves 91.50\% accuracy. Pure transformers show moderate performance—Swin Transformer V2 (92.36\%), ViT (92.10\%), and DINOv2 (91.00\%)—indicating they benefit from larger datasets or convolutional integration for specialized microscopic imagery.
+
+Hybrid architectures consistently surpass standalone CNNs, confirming transformer refinement enhances discrimination. DenseNet-201+ViT achieves the largest improvement (+5.71\%) compared to DenseNet-201, while ConvNeXt V2 + ViT gains 4.14\% compared to ConvNeXt V2. Our ConvNeXt V2+DINOv2 gains 4.57\% compared to ConvNeXt V2, outperforming ConvNeXt V2 + ViT, demonstrating self-supervised pre-training provides stronger domain transferability. ResNet-101 + ViT improves by 2.36\% comapared to  ResNet-101, and Xception + ViT by 0.64\% compared to Xception. Notably, Swin Transformer V2 + ViT shows minimal gain (+0.21\%) compared to Swin Transformer V2, suggesting cascading transformers without convolutional features yields diminishing returns.
+
+\subsection{Per-Class Performance Analysis}
+
+Table~\ref{tab:class_metrics} details per-class metrics for our proposed framework, revealing exceptional discrimination capability across all 35 paddy varieties. Seven varieties achieve perfect classification (100\% across all metrics): BD34, BD49, BD70, BD76, BINADHAN20, BINADHAN24, and BR23, demonstrating the model's ability to capture distinctive morphological characteristics for these classes.
+
+The framework maintains remarkably high per-class accuracy, with all 35 varieties exceeding 99.50\%. Eleven varieties demonstrate near-perfect performance with precision, recall, and F1-scores all $\geq$ 97.00\%: BD33, BD51, BD56, BD57, BD72, BD79, BD93, BINADHAN08, BINADHAN10, BINADHAN17, and BR22. An additional six varieties achieve excellent performance with all metrics $\geq$ 95.00\%: BD52, BD87, BD95, BINADHAN12, BINADHAN21, and BINADHAN26.
+
+Five varieties present moderate classification challenges with recall rates between 90.0\% and 92.5\%: BD30, BD75, BD91, BINADHAN07, and BINADHAN16. BD30 and BD75 exhibit perfect precision (100\%) but reduced recall (92.5\% and 90\% respectively), indicating the model rarely produces false positives for these classes but occasionally fails to identify true instances. This pattern suggests morphological similarity with other varieties causes conservative classification decisions.
+
+BD85 demonstrates an inverse performance profile with perfect recall (100\%) but lower precision (88.89\%), meaning the model successfully identifies all BD85 instances but occasionally misclassifies other varieties as BD85. This indicates BD85 possesses distinctive features that ensure detection, though some overlapping characteristics with morphologically similar varieties cause false positive predictions. BINADHAN07 shows balanced moderate performance with both precision (92.31\%) and recall (90.00\%) below 93\%, suggesting bidirectional confusion with visually similar varieties.
+
+Despite these challenges, the overall per-class accuracy remains exceptionally high (minimum 99.50\%), confirming the hybrid architecture's robust discriminative capability. The sparse confusion patterns indicate that classification errors are distributed rather than concentrated between specific variety pairs, validating the model's generalization across diverse morphological characteristics.
+
+\begin{table}[ht]
+\centering
+\caption{Per-Class Performance Metrics for ConvNeXt V2 + DINOv2}
+\label{tab:class_metrics}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Class} & \textbf{Accuracy (\%)} & \textbf{Precision (\%)} & \textbf{Recall (\%)} & \textbf{F1-Score (\%)} \\
+\hline
+BD30 & 99.79 & 100.00 & 92.50 & 96.10 \\
+\hline
+BD33 & 99.93 & 97.56 & 100.00 & 98.77 \\
+\hline
+BD34 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+BD49 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+BD51 & 99.93 & 97.56 & 100.00 & 98.77 \\
+\hline
+BD52 & 99.86 & 95.24 & 100.00 & 97.56 \\
+\hline
+BD56 & 99.93 & 100.00 & 97.50 & 98.73 \\
+\hline
+BD57 & 99.93 & 100.00 & 97.50 & 98.73 \\
+\hline
+BD70 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+BD72 & 99.93 & 97.56 & 100.00 & 98.77 \\
+\hline
+BD75 & 99.71 & 100.00 & 90.00 & 94.74 \\
+\hline
+BD76 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+BD79 & 99.86 & 97.50 & 97.50 & 97.50 \\
+\hline
+BD85 & 99.64 & 88.89 & 100.00 & 94.12 \\
+\hline
+BD87 & 99.86 & 95.24 & 100.00 & 97.56 \\
+\hline
+BD91 & 99.64 & 97.30 & 90.00 & 93.51 \\
+\hline
+BD93 & 99.86 & 97.50 & 97.50 & 97.50 \\
+\hline
+BD95 & 99.86 & 100.00 & 95.00 & 97.44 \\
+\hline
+BINADHAN07 & 99.50 & 92.31 & 90.00 & 91.14 \\
+\hline
+BINADHAN08 & 99.93 & 100.00 & 97.50 & 98.73 \\
+\hline
+BINADHAN10 & 99.86 & 97.50 & 97.50 & 97.50 \\
+\hline
+BINADHAN11 & 99.71 & 92.86 & 97.50 & 95.12 \\
+\hline
+BINADHAN12 & 99.86 & 100.00 & 95.00 & 97.44 \\
+\hline
+BINADHAN14 & 99.79 & 95.12 & 97.50 & 96.30 \\
+\hline
+BINADHAN16 & 99.64 & 94.87 & 92.50 & 93.67 \\
+\hline
+BINADHAN17 & 99.93 & 100.00 & 97.50 & 98.73 \\
+\hline
+BINADHAN19 & 99.79 & 95.12 & 97.50 & 96.30 \\
+\hline
+BINADHAN20 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+BINADHAN21 & 99.86 & 95.24 & 100.00 & 97.56 \\
+\hline
+BINADHAN23 & 99.86 & 100.00 & 95.00 & 97.44 \\
+\hline
+BINADHAN24 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+BINADHAN25 & 99.79 & 95.12 & 97.50 & 96.30 \\
+\hline
+BINADHAN26 & 99.86 & 95.24 & 100.00 & 97.56 \\
+\hline
+BR22 & 99.93 & 97.56 & 100.00 & 98.77 \\
+\hline
+BR23 & 100.00 & 100.00 & 100.00 & 100.00 \\
+\hline
+\end{tabular}
+}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.48\textwidth]{confusion_matrix_standard_300dpi.png}
+\caption{Confusion matrix showing classification results across 35 paddy varieties.}
+\label{fig:confusion_matrix}
+\end{figure}
+
+Figure~\ref{fig:confusion_matrix} shows strong diagonal concentration with sparse off-diagonal elements, confirming effective discrimination. Misclassifications appear scattered rather than clustered, suggesting errors stem from natural morphological variation rather than systematic confusion between specific variety pairs.
+
+
+
+
+\section{Discussion}
+
+The experimental results reveal several important insights for fine-grained agricultural classification. Hybrid architectures outperform standalone models by combining complementary strengths: convolutional networks capture local spatial patterns through translation-equivariant operations, while transformers model global context via self-attention. Our ConvNeXt V2 + DINOv2 framework demonstrates that self-supervised pre-training yields feature representations that generalize effectively to specialized domains. DINOv2's training on diverse natural images enables transfer to agricultural microscopy despite domain differences, suggesting self-supervised learning offers advantages over supervised pre-training for domain adaptation.
+
+While achieving optimal accuracy (97.50\%), our hybrid framework requires sequential processing through both networks, increasing inference time compared to standalone architectures. Real-time applications may favor efficient alternatives like MobileNetV4 (94.93\%) or Xception (95.36\%), which provide favorable accuracy-efficiency trade-offs. Multiple architectures exceeding 95\% accuracy give practitioners flexibility to select models based on operational constraints, including inference speed, memory footprint, and deployment platform capabilities.
+
+The effectiveness of hybrid CNN-transformer architectures extends beyond paddy classification to related agricultural computer vision tasks, including crop disease diagnosis, seed quality assessment, and plant phenotyping. Our systematic evaluation framework provides a template for architectural comparison in specialized domains. The 97.50\% accuracy demonstrates that automated paddy classification systems approach commercial deployment reliability, with potential to revolutionize seed certification, quality control, and agricultural research through rapid, objective, and scalable identification.
+
+
+\section{Conclusion}
+
+This paper presents a comprehensive investigation into automated paddy variety classification using microscopic imagery. We introduced a novel hybrid architecture combining ConvNeXt V2 and DINOv2 that achieves 97.50\% accuracy on the PaddyVarietyBD dataset comprising 35 distinct varieties. Through systematic evaluation of 18 architectures spanning traditional CNNs, modern convolutional networks, vision transformers, and hybrid combinations, we demonstrated that strategic fusion of hierarchical convolutional features with self-supervised transformer representations yields superior discriminative capability for fine-grained classification.
+
+The results establish key principles for agricultural computer vision, demonstrating that hybrid architectures consistently outperform standalone models by combining complementary inductive biases, self-supervised pre-training provides highly transferable visual representations, and modern convolutional designs offer strong feature extraction competitive with pure transformers while maintaining computational efficiency.
+
+Our work demonstrates that automated paddy classification systems can achieve reliability suitable for real-world deployment in seed certification, quality control, and breeding research. The comprehensive benchmarks establish reference points for future research, while the methodological framework provides guidance for similar fine-grained recognition challenges in agricultural domains.
+
+Future directions include extending the dataset to international rice varieties, investigating multi-modal fusion with hyperspectral or 3D imaging, developing lightweight architectures for edge deployment, and exploring semi-supervised learning for unlabeled data. 
+
+The convergence of deep learning and agricultural science holds tremendous potential for addressing global food security through enhanced crop productivity, quality assurance, and sustainable farming. This work advances automated crop variety identification toward that goal.
+
+\bibliographystyle{IEEEtran}
+\bibliography{bib,bib2}
+
+\end{document}
