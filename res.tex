@@ -1,0 +1,234 @@
+\documentclass[11pt,a4paper]{article}
+% \usepackage[utf-8]{inputenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{caption}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+\captionsetup{font=small}
+
+\title{\textbf{Comprehensive Performance Analysis of Deep Learning Models for Rice Classification}}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section{Overall Performance Comparison}
+
+\subsection{Model Accuracy and Loss Metrics}
+
+Table~\ref{tab:overall} presents the overall performance metrics for all five models across training, validation, and test sets.
+
+\begin{table}[H]
+\centering
+\caption{Overall Model Performance}
+\label{tab:overall}
+\begin{tabular}{p{4.5cm}cccccc}
+\toprule
+\multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c}{\textbf{Loss}} & \multicolumn{2}{c}{\textbf{Accuracy (\%)}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+& & Train & Test & Train & Test \\
+\midrule
+\textbf{ConvNeXt V2 + DINOv2} & All & 0.000082 & 0.154752 & \textbf{100.00} & \textbf{96.26} \\
+\textbf{DenseNet-201} & All & 0.015481 & 0.134259 & 99.63 & 95.42 \\
+\textbf{Swin Transformer V2} & All & 0.011652 & 0.159184 & 99.61 & 95.16 \\
+\textbf{VGG-19} & All & 0.001319 & 0.380553 & 99.93 & 93.11 \\
+\textbf{ResNet-101} & All & 0.035239 & 0.378088 & 99.13 & 88.58 \\
+\midrule
+\multicolumn{6}{p{14cm}}{\textit{Validation accuracy: ConvNeXt V2 + DINOv2: 96.74\%, DenseNet-201: 96.05\%, Swin V2: 95.16\%, VGG-19: 93.89\%, ResNet-101: 88.58\%}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Macro-Average Performance Metrics}
+
+Table~\ref{tab:macro} shows macro-averaged precision, recall, and F1-score across all rice varieties, providing insight into balanced performance across classes.
+
+\begin{table}[H]
+\centering
+\caption{Macro-Average Performance Metrics}
+\label{tab:macro}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Dataset} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+\multirow{3}{*}{\textbf{ConvNeXt V2 + DINOv2}}
+& Training & 1.0000 & 1.0000 & 1.0000 \\
+& Validation & 0.9678 & 0.9674 & 0.9673 \\
+& Test & \textbf{0.9634} & \textbf{0.9626} & \textbf{0.9626} \\
+\midrule
+\multirow{3}{*}{\textbf{DenseNet-201}}
+& Training & 0.9963 & 0.9963 & 0.9963 \\
+& Validation & 0.9603 & 0.9605 & 0.9604 \\
+& Test & 0.9548 & 0.9542 & 0.9541 \\
+\midrule
+\multirow{3}{*}{\textbf{Swin Transformer V2}}
+& Training & 0.9961 & 0.9961 & 0.9961 \\
+& Validation & 0.9544 & 0.9516 & 0.9518 \\
+& Test & 0.9548 & 0.9516 & 0.9515 \\
+\midrule
+\multirow{3}{*}{\textbf{VGG-19}}
+& Training & 0.9993 & 0.9993 & 0.9993 \\
+& Validation & 0.9411 & 0.9389 & 0.9389 \\
+& Test & 0.9331 & 0.9311 & 0.9308 \\
+\midrule
+\multirow{3}{*}{\textbf{ResNet-101}}
+& Training & 0.9913 & 0.9913 & 0.9913 \\
+& Validation & 0.8912 & 0.8858 & 0.8858 \\
+& Test & 0.8898 & 0.8858 & 0.8852 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Findings}
+
+\begin{itemize}
+    \item \textbf{ConvNeXt V2 + DINOv2} demonstrates exceptional performance with 96.26\% test accuracy and minimal overfitting (training accuracy: 100\%, test accuracy: 96.26\%).
+    \item \textbf{DenseNet-201} achieves strong results with 95.42\% test accuracy and good generalization (training: 99.63\%, test: 95.42\%).
+    \item \textbf{Swin Transformer V2} shows competitive performance with 95.16\% test accuracy and minimal overfitting (training: 99.61\%, test: 95.16\%).
+    \item \textbf{VGG-19} achieves solid results with 93.11\% test accuracy, showing good generalization.
+    \item \textbf{ResNet-101} shows the lowest performance at 88.58\% test accuracy, with the highest validation and test loss.
+    \item All models achieve near-perfect training accuracy, indicating sufficient model capacity.
+    \item The generalization gap (train-test difference) is smallest for ConvNeXt V2 + DINOv2, followed closely by DenseNet-201 and Swin Transformer V2.
+\end{itemize}
+
+\section{Per-Class Performance Analysis}
+
+\subsection{Best and Worst Performing Classes}
+
+Table~\ref{tab:best_worst} highlights the best and worst performing rice varieties for each model on the test set.
+
+\begin{table}[H]
+\centering
+\caption{Best and Worst Performing Classes (Test Set)}
+\label{tab:best_worst}
+\small
+\begin{tabular}{llcc}
+\toprule
+\textbf{Model} & \textbf{Category} & \textbf{Rice Variety} & \textbf{Accuracy (\%)} \\
+\midrule
+\multirow{6}{*}{\textbf{ConvNeXt V2 + DINOv2}}
+& \multirow{3}{*}{Best (100\%)} & BD72, Binadhan20, Binadhan25 & 100.00 \\
+& & BD76, BR23, BRRI67, BRRI74 & 100.00 \\
+\cmidrule{2-4}
+& Worst & BD49 & 86.00 \\
+\midrule
+\multirow{6}{*}{\textbf{DenseNet-201}}
+& \multirow{3}{*}{Best (100\%)} & BD39, BD57, BD70, BD72 & 100.00 \\
+& & BD76, Binadhan20, Binadhan25, BRRI102 & 100.00 \\
+& & BRRI74 & 100.00 \\
+\cmidrule{2-4}
+& Worst & BD49, Binadhan21 & 84.00 \\
+\midrule
+\multirow{6}{*}{\textbf{Swin Transformer V2}}
+& \multirow{3}{*}{Best (100\%)} & BD39, BD70, BD72, BD76 & 100.00 \\
+& & BD79, BD95, Binadhan20, BR23 & 100.00 \\
+& & BRRI102, BRRI67 & 100.00 \\
+\cmidrule{2-4}
+& Worst & BR22 & 70.00 \\
+\midrule
+\multirow{6}{*}{\textbf{VGG-19}}
+& \multirow{2}{*}{Best (100\%)} & BD39, BD72, Binadhan20 & 100.00 \\
+& & BRRI102, BRRI74 & 100.00 \\
+\cmidrule{2-4}
+& Worst & Binadhan10 & 70.00 \\
+\midrule
+\multirow{6}{*}{\textbf{ResNet-101}}
+& \multirow{2}{*}{Best (100\%)} & BD39, BD72, Binadhan20 & 100.00 \\
+& & BR23, BRRI67 & 100.00 \\
+\cmidrule{2-4}
+& Worst & Binadhan14, Binadhan21 & 66.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Class-wise Accuracy Comparison}
+
+Table~\ref{tab:classwise} compares test accuracy across models for all 38 rice varieties.
+
+\begin{table}[H]
+\centering
+\caption{Test Accuracy Comparison Across All Rice Varieties (\%)}
+\label{tab:classwise}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Rice Variety} & \textbf{ConvNeXt v2 + dino v2} & \textbf{DenseNet} & \textbf{Swin V2} & \textbf{VGG-19} & \textbf{ResNet} \\
+\midrule
+BD30 & 92.00 & \textbf{96.00} & 90.00 & 90.00 & 80.00 \\
+BD33 & \textbf{98.00} & 94.00 & 92.00 & \textbf{98.00} & 94.00 \\
+BD39 & \textbf{98.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} \\
+BD49 & 86.00 & 84.00 & 92.00 & 90.00 & 88.00 \\
+BD51 & 96.00 & 96.00 & \textbf{98.00} & \textbf{98.00} & \textbf{98.00} \\
+BD52 & 90.00 & \textbf{98.00} & \textbf{98.00} & 90.00 & 74.00 \\
+BD56 & \textbf{98.00} & 94.00 & 96.00 & 96.00 & 88.00 \\
+BD57 & \textbf{98.00} & \textbf{100.00} & \textbf{98.00} & \textbf{98.00} & 92.00 \\
+BD70 & \textbf{98.00} & \textbf{98.00} & \textbf{100.00} & 96.00 & 94.00 \\
+BD72 & \textbf{98.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} \\
+BD75 & 92.00 & 92.00 & 88.00 & 82.00 & 74.00 \\
+BD76 & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & \textbf{98.00} & 96.00 \\
+BD79 & 96.00 & \textbf{98.00} & \textbf{100.00} & 94.00 & 96.00 \\
+BD85 & 92.00 & 90.00 & 94.00 & 90.00 & 76.00 \\
+BD87 & \textbf{100.00} & 96.00 & \textbf{98.00} & \textbf{100.00} & 96.00 \\
+BD91 & \textbf{98.00} & \textbf{98.00} & 94.00 & 96.00 & 94.00 \\
+BD93 & 92.00 & 94.00 & 86.00 & 92.00 & 70.00 \\
+BD95 & \textbf{100.00} & \textbf{98.00} & \textbf{100.00} & \textbf{98.00} & 90.00 \\
+Binadhan10 & 86.00 & 88.00 & 86.00 & 70.00 & 72.00 \\
+Binadhan11 & \textbf{98.00} & \textbf{98.00} & 94.00 & 90.00 & 94.00 \\
+Binadhan12 & \textbf{98.00} & 96.00 & 96.00 & 94.00 & 94.00 \\
+Binadhan14 & 96.00 & 94.00 & 88.00 & 74.00 & 66.00 \\
+Binadhan16 & \textbf{98.00} & 92.00 & \textbf{98.00} & 94.00 & 92.00 \\
+Binadhan17 & \textbf{98.00} & 96.00 & 96.00 & 96.00 & 92.00 \\
+Binadhan19 & 94.00 & 92.00 & 94.00 & 90.00 & 90.00 \\
+Binadhan20 & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} \\
+Binadhan21 & 94.00 & 84.00 & \textbf{98.00} & 94.00 & 66.00 \\
+Binadhan23 & 96.00 & 96.00 & \textbf{100.00} & \textbf{98.00} & 86.00 \\
+Binadhan24 & 96.00 & 88.00 & 96.00 & 86.00 & 84.00 \\
+Binadhan25 & \textbf{100.00} & \textbf{100.00} & \textbf{98.00} & 96.00 & \textbf{98.00} \\
+Binadhan26 & 92.00 & 90.00 & 88.00 & 84.00 & 86.00 \\
+Binadhan7 & \textbf{98.00} & \textbf{98.00} & \textbf{98.00} & 88.00 & 84.00 \\
+Binadhan8 & \textbf{98.00} & 92.00 & 96.00 & 92.00 & 90.00 \\
+BR22 & 96.00 & \textbf{98.00} & 70.00 & 94.00 & 82.00 \\
+BR23 & \textbf{98.00} & \textbf{100.00} & \textbf{100.00} & 96.00 & \textbf{100.00} \\
+BRRI102 & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & \textbf{100.00} & 96.00 \\
+BRRI67 & \textbf{100.00} & \textbf{98.00} & \textbf{100.00} & 96.00 & 96.00 \\
+BRRI74 & \textbf{100.00} & \textbf{100.00} & 96.00 & \textbf{100.00} & \textbf{98.00} \\
+\midrule
+\textbf{Average} & \textbf{96.26} & \textbf{95.42} & \textbf{95.16} & \textbf{93.11} & \textbf{88.58} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Test Set Performance Summary}
+
+Table~\ref{tab:test_summary} consolidates the accuracy, precision, recall, and F1-score of all five models on the test set.
+
+\begin{table}[H]
+\centering
+\caption{Test Set Performance Summary}
+\label{tab:test_summary}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Accuracy (\%)} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+\textbf{ConvNeXt V2 + DINOv2} & \textbf{96.26} & \textbf{0.9634} & \textbf{0.9626} & \textbf{0.9626} \\
+\textbf{DenseNet-201}          & 95.42          & 0.9548          & 0.9542          & 0.9541          \\
+\textbf{Swin Transformer V2}   & 95.16          & 0.9548          & 0.9516          & 0.9515          \\
+\textbf{VGG-19}                & 93.11          & 0.9331          & 0.9311          & 0.9308          \\
+\textbf{ResNet-101}            & 88.58          & 0.8898          & 0.8858          & 0.8852          \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
