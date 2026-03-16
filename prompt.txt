@@ -1,0 +1,1 @@
+write a ieee conference paper . using the reference paper.tex as a template . I am using the models in the result table.tex in this paper the methodology is same as the template paper . use related work.md for related work section . the paper i am writing uses the dataset from dataset paper.txt . keep in mind of  ai and plagairsm checkers.
